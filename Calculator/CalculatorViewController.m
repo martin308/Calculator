@@ -33,13 +33,20 @@
 
 - (IBAction)digitPressed:(UIButton *)sender {
     NSString *digit = [sender currentTitle];
-    if (self.userIsInTheMiddleOfEnteringANumber) {
-        self.display.text = [self.display.text stringByAppendingString:digit];
-    } else {
-        self.display.text = digit;
-        self.userIsInTheMiddleOfEnteringANumber = YES;
+    
+    //we allow a period if we do not have one currently in the input or the user is not in the middle of entering a number
+    BOOL allowPeriod = [self.display.text rangeOfString:@"."].location == NSNotFound || !self.userIsInTheMiddleOfEnteringANumber;
+    BOOL inputContainsPeriod = [digit rangeOfString:@"."].location != NSNotFound;
+    
+    //the input doesnt have a period, the input has a period but we havent typed one yet
+    if (!inputContainsPeriod || (inputContainsPeriod && allowPeriod)) {
+        if (self.userIsInTheMiddleOfEnteringANumber) {
+            self.display.text = [self.display.text stringByAppendingString:digit];
+        } else {
+            self.display.text = digit;
+            self.userIsInTheMiddleOfEnteringANumber = YES;
+        }
     }
-
 }
 
 - (IBAction)enterPressed {
