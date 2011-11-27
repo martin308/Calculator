@@ -13,6 +13,7 @@
 
 @property (nonatomic) BOOL userIsInTheMiddleOfEnteringANumber;
 @property (nonatomic, strong) CalculatorBrain *brain;
+- (void)addToDisplay:(UIButton *)button withSpacePrefix:(BOOL)addSpacePrefix;
 
 @end
 
@@ -21,6 +22,7 @@
 @synthesize display = _display; 
 @synthesize userIsInTheMiddleOfEnteringANumber = _userIsInTheMiddleOfEnteringANumber;
 @synthesize brain = _brain;
+@synthesize brainDisplay = _brainDisplay;
 
 - (CalculatorBrain *)brain
 {
@@ -37,6 +39,7 @@
     //we allow a period if we do not have one currently in the input or the user is not in the middle of entering a number
     BOOL allowPeriod = [self.display.text rangeOfString:@"."].location == NSNotFound || !self.userIsInTheMiddleOfEnteringANumber;
     BOOL inputContainsPeriod = [digit rangeOfString:@"."].location != NSNotFound;
+    BOOL newNumberBeingEntered = NO;
     
     //the input doesnt have a period, the input has a period but we havent typed one yet
     if (!inputContainsPeriod || (inputContainsPeriod && allowPeriod)) {
@@ -45,22 +48,41 @@
         } else {
             self.display.text = digit;
             self.userIsInTheMiddleOfEnteringANumber = YES;
+            newNumberBeingEntered = YES;
         }
+        
+        [self addToDisplay:sender withSpacePrefix:newNumberBeingEntered];
     }
 }
 
-- (IBAction)enterPressed {
+- (IBAction)enterPressed:(UIButton *)sender {
     [self.brain pushOperand:[self.display.text doubleValue]];
     self.userIsInTheMiddleOfEnteringANumber = NO;
+    
+    if (sender != nil) {
+        [self addToDisplay:sender withSpacePrefix:YES];
+    }
 }
-
 - (IBAction)operationPressed:(UIButton *)sender {
     if (self.userIsInTheMiddleOfEnteringANumber) {
-        [self enterPressed];
+        [self enterPressed:nil];
     }
     NSString *operation = sender.currentTitle;
     double result = [self.brain performOperation:operation];
     self.display.text = [NSString stringWithFormat:@"%g", result];
+    [self addToDisplay:sender withSpacePrefix:YES];
+}
+
+- (void)addToDisplay:(UIButton *)button withSpacePrefix:(BOOL)addSpacePrefix {
+    NSString *newText = self.brainDisplay.text;
+    
+    if (addSpacePrefix) {
+        newText = [newText stringByAppendingString:@" "];
+    }
+    
+    newText = [newText stringByAppendingString:button.currentTitle];
+    
+    self.brainDisplay.text = newText;
 }
 
 @end
