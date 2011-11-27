@@ -85,4 +85,11 @@
     self.brainDisplay.text = newText;
 }
 
+- (IBAction)clearPressed {
+    [self.brain clear];
+    self.userIsInTheMiddleOfEnteringANumber = NO;
+    self.brainDisplay.text = @"";
+    self.display.text = @"0";
+}
+
 @end
